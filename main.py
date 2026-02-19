@@ -2,28 +2,17 @@
 import asyncio
 import logging
 import time
-import os
 
 from aiogram.utils import executor
 from aiogram.utils.exceptions import TerminatedByOtherGetUpdates
 
-from core import (
-    dp, db_pool,
-    before_start,
-    create_db_pool, init_db,
-    start_web_server,  # если нужен веб-сервер для health checks
-)
-from utils import *
-from games_handlers import *
-from user_handlers import *
-from admin_handlers import *
-from background_tasks import (
-    boss_spawn_loop,
-    check_expired_bosses,
-    cleanup_loop,
-    ad_sender_loop,
-    reset_daily_limits,
-)
+# Импортируем ядро и все хендлеры
+from core import dp, bot, db_pool, before_start, create_db_pool, init_db, start_web_server
+import user_handlers
+import admin_handlers
+import games_handlers
+import chat_handlers
+from background_tasks import boss_spawn_loop, cleanup_loop, ad_sender_loop
 
 # ===== ЗАПУСК =====
 async def on_startup(dp):
@@ -32,11 +21,8 @@ async def on_startup(dp):
     await init_db()
     # Запускаем фоновые задачи
     asyncio.create_task(boss_spawn_loop())
-    asyncio.create_task(check_expired_bosses())
     asyncio.create_task(cleanup_loop())
     asyncio.create_task(ad_sender_loop())
-    asyncio.create_task(reset_daily_limits())
-    # Запускаем веб-сервер (для Railway)
     asyncio.create_task(start_web_server())
     logging.info("🤖 Бот запущен и готов к работе!")
     logging.info(f"👑 Суперадмины: {SUPER_ADMINS}")
@@ -45,7 +31,7 @@ async def on_startup(dp):
 async def on_shutdown(dp):
     await db_pool.close()
     await dp.storage.close()
-    await dp.bot.close()
+    await bot.close()
     logging.info("Бот остановлен")
 
 if __name__ == "__main__":

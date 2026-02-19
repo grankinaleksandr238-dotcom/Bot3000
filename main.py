@@ -6,8 +6,10 @@ import time
 from aiogram.utils import executor
 from aiogram.utils.exceptions import TerminatedByOtherGetUpdates
 
-# Импортируем ядро и все хендлеры
-from core import dp, bot, db_pool, before_start, create_db_pool, init_db, start_web_server
+from core import (
+    dp, bot, db_pool, before_start, create_db_pool, init_db,
+    start_web_server, SUPER_ADMINS
+)
 import user_handlers
 import admin_handlers
 import games_handlers
